@@ -1,0 +1,67 @@
+{
+  "show_title": "Simpsons TV Prototype",
+  "boot_messages": [
+    "Montando almacenamiento local...",
+    "Cargando temporadas y capitulos...",
+    "Iniciando interfaz estilo mini tele...",
+    "Todo listo."
+  ],
+  "seasons": [
+    {
+      "number": 1,
+      "title": "Primeras historias de Springfield",
+      "description": "Una seleccion de capitulos para probar el flujo completo de menu y reproduccion.",
+      "episodes": [
+        {
+          "number": 1,
+          "title": "Especial de Navidad",
+          "synopsis": "La familia pasa por unas navidades caoticas mientras Homer intenta salvar las fiestas con una solucion improvisada.",
+          "duration_minutes": 23,
+          "video_path": "media/s01e01.mp4"
+        },
+        {
+          "number": 2,
+          "title": "Bart, el genio",
+          "synopsis": "Bart altera un test escolar y termina metido en una situacion mucho mas grande de lo que esperaba.",
+          "duration_minutes": 23,
+          "video_path": "media/s01e02.mp4"
+        },
+        {
+          "number": 3,
+          "title": "La odisea de Homer",
+          "synopsis": "Homer intenta recuperar su dignidad despues de un desastre laboral que cambia la rutina familiar.",
+          "duration_minutes": 23,
+          "video_path": "media/s01e03.mp4"
+        }
+      ]
+    },
+    {
+      "number": 2,
+      "title": "Springfield en expansion",
+      "description": "Otra tanda de episodios de ejemplo para simular varias temporadas dentro de la tele.",
+      "episodes": [
+        {
+          "number": 1,
+          "title": "Bart consigue un suspenso",
+          "synopsis": "Bart se enfrenta al desastre academico definitivo y busca cualquier salida antes del examen final.",
+          "duration_minutes": 23,
+          "video_path": "media/s02e01.mp4"
+        },
+        {
+          "number": 2,
+          "title": "Simpson y Delilah",
+          "synopsis": "Homer prueba una mejora estetica inesperada y descubre lo rapido que puede cambiar la oficina.",
+          "duration_minutes": 23,
+          "video_path": "media/s02e02.mp4"
+        },
+        {
+          "number": 3,
+          "title": "Casa-arbol del terror",
+          "synopsis": "La casa se llena de historias imposibles y de un tono mas fantastico, ideal para una prueba tematica.",
+          "duration_minutes": 23,
+          "video_path": "media/s02e03.mp4"
+        }
+      ]
+    }
+  ]
+}
