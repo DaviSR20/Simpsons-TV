@@ -13,14 +13,29 @@ pantalla = pygame.display.set_mode((ANCHO, ALTO))
 pygame.display.set_caption("Snake")
 
 NEGRO = (0, 0, 0)
-VERDE = (0, 255, 0)
-ROJO = (255, 0, 0)
 BLANCO = (255, 255, 255)
+ROJO = (255, 0, 0)
 
 reloj = pygame.time.Clock()
 FPS = 10
 fuente = pygame.font.SysFont(None, 35)
 fuente_fin = pygame.font.SysFont(None, 50)
+
+# =========================
+# CARGAR IMÁGENES
+# =========================
+fondo_img = pygame.image.load("img/Springfield.png")
+donut_img = pygame.image.load("img/Donut.png")
+head_img = pygame.image.load("img/head.png")
+body_img = pygame.image.load("img/body.png")
+tail_img = pygame.image.load("img/tail.png")
+
+# Escalar imágenes
+fondo_img = pygame.transform.scale(fondo_img, (ANCHO, ALTO))
+donut_img = pygame.transform.scale(donut_img, (TAM_BLOQUE, TAM_BLOQUE))
+head_img = pygame.transform.scale(head_img, (TAM_BLOQUE, TAM_BLOQUE))
+body_img = pygame.transform.scale(body_img, (TAM_BLOQUE, TAM_BLOQUE))
+tail_img = pygame.transform.scale(tail_img, (TAM_BLOQUE, TAM_BLOQUE))
 
 
 def crear_comida():
@@ -30,22 +45,25 @@ def crear_comida():
 
 
 def dibujar_snake(snake):
-    for bloque in snake:
-        pygame.draw.rect(
-            pantalla,
-            VERDE,
-            (bloque[0], bloque[1], TAM_BLOQUE, TAM_BLOQUE)
-        )
+    for i, bloque in enumerate(snake):
+        if len(snake) == 1:
+            pantalla.blit(head_img, (bloque[0], bloque[1]))
+        elif i == 0:
+            pantalla.blit(tail_img, (bloque[0], bloque[1]))
+        elif i == len(snake) - 1:
+            pantalla.blit(head_img, (bloque[0], bloque[1]))
+        else:
+            pantalla.blit(body_img, (bloque[0], bloque[1]))
 
 
 def mostrar_puntuacion(puntos):
-    texto = fuente.render(f"Puntos: {puntos}", True, VERDE)
+    texto = fuente.render(f"Puntos: {puntos}", True, BLANCO)
     pantalla.blit(texto, (10, 10))
 
 
 def pantalla_game_over():
     while True:
-        pantalla.fill(NEGRO)
+        pantalla.blit(fondo_img, (0, 0))
 
         texto1 = fuente_fin.render("GAME OVER", True, ROJO)
         texto2 = fuente.render("Pulsa R para reiniciar", True, BLANCO)
@@ -64,14 +82,14 @@ def pantalla_game_over():
 
             if evento.type == pygame.KEYDOWN:
                 if evento.key == pygame.K_r:
-                    return  # vuelve a empezar el juego
+                    return
                 elif evento.key == pygame.K_ESCAPE:
                     pygame.quit()
                     sys.exit()
 
 
 def juego():
-    while True:  # bucle para reiniciar
+    while True:
         x = ANCHO // 2
         y = ALTO // 2
 
@@ -106,11 +124,9 @@ def juego():
                         dx = TAM_BLOQUE
                         dy = 0
 
-            # Movimiento
             x += dx
             y += dy
 
-            # Aparecer por el lado contrario
             x = x % ANCHO
             y = y % ALTO
 
@@ -120,25 +136,23 @@ def juego():
             if len(snake) > longitud:
                 del snake[0]
 
-            # Colisión consigo misma
             if cabeza in snake[:-1]:
                 jugando = False
 
-            # Comer comida
             if cabeza == comida:
                 comida = crear_comida()
                 longitud += 1
                 puntos += 1
 
-            pantalla.fill(NEGRO)
+            # DIBUJAR FONDO
+            pantalla.blit(fondo_img, (0, 0))
 
-            pygame.draw.rect(
-                pantalla,
-                ROJO,
-                (comida[0], comida[1], TAM_BLOQUE, TAM_BLOQUE)
-            )
+            # Dibujar donut
+            pantalla.blit(donut_img, (comida[0], comida[1]))
 
+            # Dibujar serpiente
             dibujar_snake(snake)
+
             mostrar_puntuacion(puntos)
 
             pygame.display.update()
