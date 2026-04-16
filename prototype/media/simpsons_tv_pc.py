@@ -1,5 +1,7 @@
 import os
 import platform
+import subprocess
+import sys
 
 # PARCHE PARA ENCONTRAR VLC EN WINDOWS
 if platform.system() == "Windows":
@@ -94,7 +96,7 @@ class SimpsonsTV:
 
         botones = [
             ("VER EPISODIOS", self.show_episodes, 0, 0),
-            ("JUEGOS", self.show_placeholder, 0, 1),
+            ("JUEGOS", self.abrir_juego, 0, 1),
             ("AJUSTES RED", self.show_placeholder, 1, 0),
             ("APAGAR", self.root.destroy, 1, 1)
         ]
@@ -150,6 +152,17 @@ class SimpsonsTV:
         tk.Button(c, text="VOLVER", command=self.show_main_menu, bg="#41316f", fg="white",
                   font=("Segoe UI Black", 18)).pack(fill="x", side="bottom", pady=20)
 
+    def abrir_juego(self):
+        base = Path(__file__).parent
+        ruta = (base / "../../Game Python/Snakenakenake.py").resolve()
+
+        print("Ruta juego:", ruta)  # DEBUG
+
+        if not ruta.exists():
+            print("❌ No existe el archivo")
+            return
+
+        subprocess.Popen([sys.executable, str(ruta)])
 
 if __name__ == "__main__":
     root = tk.Tk()

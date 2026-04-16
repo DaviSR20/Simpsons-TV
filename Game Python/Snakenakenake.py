@@ -24,11 +24,11 @@ fuente_fin = pygame.font.SysFont(None, 50)
 # =========================
 # CARGAR IMÁGENES
 # =========================
-fondo_img = pygame.image.load("img/Springfield.png")
-donut_img = pygame.image.load("img/Donut.png")
-head_img = pygame.image.load("img/head.png")
-body_img = pygame.image.load("img/body.png")
-tail_img = pygame.image.load("img/tail.png")
+fondo_img = pygame.image.load("../../Game Python/img/Springfield.png")
+donut_img = pygame.image.load("../../Game Python/img/Donut.png")
+head_img = pygame.image.load("../../Game Python/img/head.png")
+body_img = pygame.image.load("../../Game Python/img/body.png")
+tail_img = pygame.image.load("../../Game Python/img/tail.png")
 
 # Escalar imágenes
 fondo_img = pygame.transform.scale(fondo_img, (ANCHO, ALTO))
