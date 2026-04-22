@@ -52,7 +52,7 @@ def cargar_lista_imagenes(ruta_base, nombres, escala=1.0):
 
 
 # =========================
-# SELECTOR CON CARRUSEL + PERSPECTIVA
+# SELECTOR CON CARRUSEL
 # =========================
 def seleccionar_personaje_paisaje():
     personajes = cargar_lista_imagenes(
@@ -66,7 +66,7 @@ def seleccionar_personaje_paisaje():
             pygame.image.load(f"img/fons/{nombre}"),
             (ANCHO, ALTO)
         )
-        for nombre in ["1.jpg", "2.jpg", "3.jpg", "4.jpg", "5.jpg", "6.jpg", "7.png", "8.jpg"]
+        for nombre in ["10.jpg","1.jpg", "2.jpg", "3.jpg", "4.jpg", "5.jpg", "6.jpg", "7.png", "8.jpg", "9.jpg"]
     ]
 
     p_index = 0
@@ -119,7 +119,6 @@ def seleccionar_personaje_paisaje():
         # FONDO (CARRUSEL + PERSPECTIVA)
         # =========================
         bg_main_w, bg_main_h = 200, 130
-
         bg_side_w = int(bg_main_w * 0.3)
         bg_side_h = int(bg_main_h * 0.3)
 
@@ -147,15 +146,8 @@ def seleccionar_personaje_paisaje():
         x_next_bg = zona_fondo_x + separacion - bg_side_w // 2
         y_next_bg = zona_y_bg - bg_side_h // 2
 
-        # efecto perspectiva (ligera reducción extra)
-        bg_prev_small = pygame.transform.scale(
-            bg_prev,
-            (int(bg_side_w * 0.9), int(bg_side_h * 0.9))
-        )
-        bg_next_small = pygame.transform.scale(
-            bg_next,
-            (int(bg_side_w * 0.9), int(bg_side_h * 0.9))
-        )
+        bg_prev_small = pygame.transform.scale(bg_prev, (int(bg_side_w * 0.9), int(bg_side_h * 0.9)))
+        bg_next_small = pygame.transform.scale(bg_next, (int(bg_side_w * 0.9), int(bg_side_h * 0.9)))
 
         pantalla.blit(bg_prev_small, (x_prev_bg, y_prev_bg))
         pantalla.blit(bg_next_small, (x_next_bg, y_next_bg))
@@ -221,6 +213,17 @@ def mostrar_puntuacion(puntos):
 def pantalla_game_over(fondo):
     while True:
         pantalla.blit(fondo, (0, 0))
+
+        # =========================
+        # OVERLAY OSCURECIDO (DIFUMINADO VISUAL)
+        # =========================
+        overlay = pygame.Surface((ANCHO, ALTO))
+        # =========================================
+        # CONTROL DE INTENSIDAD DEL EFECTO
+        overlay.set_alpha(110)
+        # =========================================
+        overlay.fill((0, 0, 0))
+        pantalla.blit(overlay, (0, 0))
 
         t1 = fuente_fin.render("GAME OVER", True, ROJO)
         t2 = fuente.render("R = reiniciar", True, BLANCO)
@@ -306,6 +309,18 @@ def juego():
                 puntos += 1
 
             pantalla.blit(fondo_img, (0, 0))
+
+            # =========================
+            # OVERLAY OSCURECIDO (JUEGO)
+            # =========================
+            overlay = pygame.Surface((ANCHO, ALTO))
+            # =========================================
+            # CONTROL DE INTENSIDAD DEL EFECTO
+            overlay.set_alpha(90)
+            # =========================================
+            overlay.fill((0, 0, 0))
+            pantalla.blit(overlay, (0, 0))
+
             pantalla.blit(donut_img, (comida[0], comida[1]))
 
             dibujar_snake(snake, head_img)
