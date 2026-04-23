@@ -3,15 +3,7 @@ import sys
 import random
 
 pygame.init()
-# Controlador de mando
-pygame.joystick.init()
 
-if pygame.joystick.get_count() > 0:
-    mando = pygame.joystick.Joystick(0)
-    mando.init()
-    print("Mando conectado:", mando.get_name())
-else:
-    mando = None
 # =========================
 # CONFIGURACIÓN
 # =========================
@@ -28,258 +20,201 @@ ROJO = (255, 0, 0)
 
 reloj = pygame.time.Clock()
 FPS = 7
-fuente = pygame.font.SysFont(None, 35)
+
+fuente = pygame.font.SysFont(None, 30)
 fuente_fin = pygame.font.SysFont(None, 50)
 
-OFFSET_CABEZA = int(TAM_BLOQUE * 0.15)
-
+# =========================
+# IMÁGENES FIJAS
+# =========================
+donut_img = pygame.transform.scale(
+    pygame.image.load("img/Donut.png"), (TAM_BLOQUE, TAM_BLOQUE)
+)
+body_img = pygame.transform.scale(
+    pygame.image.load("img/body.png"), (TAM_BLOQUE, TAM_BLOQUE)
+)
+tail_img = pygame.transform.scale(
+    pygame.image.load("img/tail.png"), (TAM_BLOQUE, TAM_BLOQUE)
+)
 
 # =========================
-# CARGA FIJA
+# UTILIDAD IMÁGENES
 # =========================
-donut_img = pygame.image.load("img/Donut.png")
-body_img = pygame.image.load("img/body.png")
-tail_img = pygame.image.load("img/tail.png")
-
-donut_img = pygame.transform.scale(donut_img, (TAM_BLOQUE, TAM_BLOQUE))
-body_img = pygame.transform.scale(body_img, (TAM_BLOQUE, TAM_BLOQUE))
-tail_img = pygame.transform.scale(tail_img, (TAM_BLOQUE, TAM_BLOQUE))
-
-
-# =========================
-# UTILIDAD
-# =========================
-def cargar_lista_imagenes(ruta_base, nombres, escala=1.0):
-    tamaño = int(TAM_BLOQUE * escala)
+def cargar_lista_imagenes(ruta, nombres, escala=1.0):
+    size = int(TAM_BLOQUE * escala)
     return [
         pygame.transform.scale(
-            pygame.image.load(f"{ruta_base}/{nombre}"),
-            (tamaño, tamaño)
+            pygame.image.load(f"{ruta}/{n}"), (size, size)
         )
-        for nombre in nombres
+        for n in nombres
     ]
-
-
-# =========================
-# SELECTOR CON CARRUSEL
-# =========================
-def seleccionar_personaje_paisaje():
-    personajes = cargar_lista_imagenes(
-        "img/heads",
-        ["homer.png", "patty.png", "smithers.png", "marge.png", "bart.png", "lisa.png"],
-        1.3
-    )
-
-    paisajes = [
-        pygame.transform.scale(
-            pygame.image.load(f"img/fons/{nombre}"),
-            (ANCHO, ALTO)
-        )
-        for nombre in ["10.jpg","1.jpg", "2.jpg", "3.jpg", "4.jpg", "5.jpg", "6.jpg", "7.png", "8.jpg", "9.jpg"]
-    ]
-
-    p_index = 0
-    bg_index = 0
-
-    ultimo_movimiento = 0  # ✅ FUERA del while
-    delay = 200
-    while True:
-        pantalla.fill(NEGRO)
-
-        titulo = fuente.render("Selecciona personaje y paisaje", True, BLANCO)
-        ayuda = fuente.render("A personaje | S paisaje | ENTER jugar", True, BLANCO)
-
-        pantalla.blit(titulo, (120, 40))
-        pantalla.blit(ayuda, (80, 80))
-
-        # =========================
-        # PERSONAJE (CARRUSEL)
-        # =========================
-        size_main = 80
-        size_side = int(size_main * 0.3)
-
-        prev_p = (p_index - 1) % len(personajes)
-        next_p = (p_index + 1) % len(personajes)
-
-        img_main = pygame.transform.scale(personajes[p_index], (size_main, size_main))
-        img_prev = pygame.transform.scale(personajes[prev_p], (size_side, size_side))
-        img_next = pygame.transform.scale(personajes[next_p], (size_side, size_side))
-
-        img_prev.set_alpha(120)
-        img_next.set_alpha(120)
-
-        zona_personaje_x = ANCHO // 4
-        zona_y = ALTO // 2 + 30
-
-        x_main = zona_personaje_x - size_main // 2
-        y_main = zona_y - size_main // 2
-
-        x_prev = zona_personaje_x - size_main
-        y_prev = zona_y - size_side // 2
-
-        x_next = zona_personaje_x + size_main - size_side
-        y_next = zona_y - size_side // 2
-
-        pantalla.blit(img_prev, (x_prev, y_prev))
-        pantalla.blit(img_main, (x_main, y_main))
-        pantalla.blit(img_next, (x_next, y_next))
-
-        pygame.draw.rect(pantalla, BLANCO, (x_main - 2, y_main - 2, size_main + 4, size_main + 4), 2)
-
-        # =========================
-        # FONDO (CARRUSEL + PERSPECTIVA)
-        # =========================
-        bg_main_w, bg_main_h = 200, 130
-        bg_side_w = int(bg_main_w * 0.3)
-        bg_side_h = int(bg_main_h * 0.3)
-
-        prev_bg = (bg_index - 1) % len(paisajes)
-        next_bg = (bg_index + 1) % len(paisajes)
-
-        bg_main = pygame.transform.scale(paisajes[bg_index], (bg_main_w, bg_main_h))
-        bg_prev = pygame.transform.scale(paisajes[prev_bg], (bg_side_w, bg_side_h))
-        bg_next = pygame.transform.scale(paisajes[next_bg], (bg_side_w, bg_side_h))
-
-        bg_prev.set_alpha(120)
-        bg_next.set_alpha(120)
-
-        zona_fondo_x = 3 * ANCHO // 4
-        zona_y_bg = ALTO // 2 + 30
-
-        separacion = 140
-
-        x_main_bg = zona_fondo_x - bg_main_w // 2
-        y_main_bg = zona_y_bg - bg_main_h // 2
-
-        x_prev_bg = zona_fondo_x - separacion - bg_side_w // 2
-        y_prev_bg = zona_y_bg - bg_side_h // 2
-
-        x_next_bg = zona_fondo_x + separacion - bg_side_w // 2
-        y_next_bg = zona_y_bg - bg_side_h // 2
-
-        bg_prev_small = pygame.transform.scale(bg_prev, (int(bg_side_w * 0.9), int(bg_side_h * 0.9)))
-        bg_next_small = pygame.transform.scale(bg_next, (int(bg_side_w * 0.9), int(bg_side_h * 0.9)))
-
-        pantalla.blit(bg_prev_small, (x_prev_bg, y_prev_bg))
-        pantalla.blit(bg_next_small, (x_next_bg, y_next_bg))
-        pantalla.blit(bg_main, (x_main_bg, y_main_bg))
-
-        pygame.draw.rect(
-            pantalla,
-            BLANCO,
-            (x_main_bg - 2, y_main_bg - 2, bg_main_w + 4, bg_main_h + 4),
-            2
-        )
-
-        pygame.display.update()
-
-        for evento in pygame.event.get():
-            if evento.type == pygame.QUIT:
-                pygame.quit()
-                sys.exit()
-
-            if evento.type == pygame.KEYDOWN:
-                if evento.key == pygame.K_a:
-                    p_index = (p_index + 1) % len(personajes)
-
-                elif evento.key == pygame.K_s:
-                    bg_index = (bg_index + 1) % len(paisajes)
-
-                elif evento.key == pygame.K_RETURN:
-                    return personajes[p_index], paisajes[bg_index]
-            if evento.type == pygame.JOYBUTTONDOWN:
-                if evento.button == 0:  # botón A (Xbox) / X (PlayStation)
-                    print("Botón A pulsado")
-
-        tiempo_actual = pygame.time.get_ticks()
-
-
-        if mando and tiempo_actual - ultimo_movimiento > delay:
-            eje_x = mando.get_axis(0)
-
-            if eje_x > 0.9:
-                bg_index = (bg_index + 1) % len(paisajes)
-                ultimo_movimiento = tiempo_actual
-
-            elif eje_x < -0.9:
-                p_index = (p_index + 1) % len(personajes)
-                ultimo_movimiento = tiempo_actual
 
 # =========================
 # COMIDA
 # =========================
-def crear_comida():
-    x = random.randrange(0, ANCHO, TAM_BLOQUE)
-    y = random.randrange(0, ALTO, TAM_BLOQUE)
-    return [x, y]
-
-
-# =========================
-# DIBUJAR SERPIENTE
-# =========================
-def dibujar_snake(snake, head_img):
-    for i, bloque in enumerate(snake):
-        if len(snake) == 1:
-            pantalla.blit(head_img, (bloque[0] - OFFSET_CABEZA, bloque[1] - OFFSET_CABEZA))
-        elif i == 0:
-            pantalla.blit(tail_img, (bloque[0], bloque[1]))
-        elif i == len(snake) - 1:
-            pantalla.blit(head_img, (bloque[0] - OFFSET_CABEZA, bloque[1] - OFFSET_CABEZA))
-        else:
-            pantalla.blit(body_img, (bloque[0], bloque[1]))
-
-
-# =========================
-# UI
-# =========================
-def mostrar_puntuacion(puntos):
-    texto = fuente.render(f"Puntos: {puntos}", True, BLANCO)
-    pantalla.blit(texto, (10, 10))
-
-
-def pantalla_game_over(fondo):
+def crear_comida(snake):
     while True:
-        pantalla.blit(fondo, (0, 0))
+        pos = [
+            random.randrange(0, ANCHO, TAM_BLOQUE),
+            random.randrange(0, ALTO, TAM_BLOQUE)
+        ]
+        if pos not in snake:
+            return pos
+
+# =========================
+# SELECTOR (RESTAURADO)
+# =========================
+def selector():
+
+    personajes = cargar_lista_imagenes(
+        "img/heads",
+        ["homer.png","patty.png","smithers.png","marge.png","bart.png","lisa.png"],
+        1.2
+    )
+
+    fondos = [
+        pygame.transform.scale(
+            pygame.image.load(f"img/fons/{n}"),
+            (ANCHO, ALTO)
+        )
+        for n in ["10.jpg","1.jpg","2.jpg","3.jpg","4.jpg","5.jpg","6.jpg","7.png","9.jpg","8.jpg"]
+    ]
+
+    p_i = 0
+    f_i = 0
+
+    while True:
+
+        pantalla.fill((30, 30, 30))
+
+        pantalla.blit(fuente.render("Selecciona personaje y paisaje", True, BLANCO), (120, 20))
+        pantalla.blit(fuente.render("← → personaje | A D fondo | ENTER jugar", True, BLANCO), (90, 60))
 
         # =========================
-        # OVERLAY OSCURECIDO (DIFUMINADO VISUAL)
+        # PERSONAJE
         # =========================
-        overlay = pygame.Surface((ANCHO, ALTO))
-        # =========================================
-        # CONTROL DE INTENSIDAD DEL EFECTO
-        overlay.set_alpha(110)
-        # =========================================
-        overlay.fill((0, 0, 0))
-        pantalla.blit(overlay, (0, 0))
+        cx = ANCHO // 4
+        cy = ALTO // 2
 
-        t1 = fuente_fin.render("GAME OVER", True, ROJO)
-        t2 = fuente.render("R = reiniciar", True, BLANCO)
-        t3 = fuente.render("ESC = salir", True, BLANCO)
+        main = pygame.transform.scale(personajes[p_i], (80, 80))
+        prev = pygame.transform.scale(personajes[(p_i - 1) % len(personajes)], (50, 50))
+        nxt = pygame.transform.scale(personajes[(p_i + 1) % len(personajes)], (50, 50))
 
-        pantalla.blit(t1, (180, 150))
-        pantalla.blit(t2, (200, 220))
-        pantalla.blit(t3, (200, 260))
+        prev.set_alpha(120)
+        nxt.set_alpha(120)
+
+        pantalla.blit(prev, prev.get_rect(center=(cx - 90, cy)))
+        pantalla.blit(main, main.get_rect(center=(cx, cy)))
+        pantalla.blit(nxt, nxt.get_rect(center=(cx + 90, cy)))
+
+        # =========================
+        # FONDO
+        # =========================
+        fx = 3 * ANCHO // 4
+        fy = ALTO // 2
+
+        bg_main = pygame.transform.scale(fondos[f_i], (160, 100))
+        bg_prev = pygame.transform.scale(fondos[(f_i - 1) % len(fondos)], (110, 70))
+        bg_next = pygame.transform.scale(fondos[(f_i + 1) % len(fondos)], (110, 70))
+
+        bg_prev.set_alpha(120)
+        bg_next.set_alpha(120)
+
+        pantalla.blit(bg_prev, bg_prev.get_rect(center=(fx - 110, fy)))
+        pantalla.blit(bg_main, bg_main.get_rect(center=(fx, fy)))
+        pantalla.blit(bg_next, bg_next.get_rect(center=(fx + 110, fy)))
 
         pygame.display.update()
+        reloj.tick(20)
 
-        for evento in pygame.event.get():
-            if evento.type == pygame.QUIT:
+        # =========================
+        # INPUT SELECTOR
+        # =========================
+        for e in pygame.event.get():
+
+            if e.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
 
-            if evento.type == pygame.KEYDOWN:
-                if evento.key == pygame.K_r:
+            if e.type == pygame.KEYDOWN:
+
+                if e.key == pygame.K_LEFT:
+                    p_i = (p_i - 1) % len(personajes)
+
+                if e.key == pygame.K_RIGHT:
+                    p_i = (p_i + 1) % len(personajes)
+
+                if e.key == pygame.K_a:
+                    f_i = (f_i - 1) % len(fondos)
+
+                if e.key == pygame.K_d:
+                    f_i = (f_i + 1) % len(fondos)
+
+                if e.key == pygame.K_RETURN:
+                    return personajes[p_i], fondos[f_i]
+
+# =========================
+# PAUSA
+# =========================
+def pausa():
+
+    while True:
+
+        pantalla.fill((0, 0, 0))
+
+        pantalla.blit(fuente_fin.render("PAUSA", True, BLANCO), (230, 150))
+        pantalla.blit(fuente.render("ESC = volver | R = salir", True, BLANCO), (150, 220))
+
+        pygame.display.update()
+
+        for e in pygame.event.get():
+
+            if e.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+
+            if e.type == pygame.KEYDOWN:
+
+                if e.key == pygame.K_ESCAPE:
                     return True
-                if evento.key == pygame.K_ESCAPE:
+                if e.key == pygame.K_r:
                     return False
 
+# =========================
+# GAME OVER
+# =========================
+def game_over():
+
+    while True:
+
+        pantalla.fill((0, 0, 0))
+
+        pantalla.blit(fuente_fin.render("GAME OVER", True, ROJO), (160, 150))
+        pantalla.blit(fuente.render("R = reiniciar | ESC = salir", True, BLANCO), (120, 220))
+
+        pygame.display.update()
+
+        for e in pygame.event.get():
+
+            if e.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+
+            if e.type == pygame.KEYDOWN:
+
+                if e.key == pygame.K_r:
+                    return True
+                if e.key == pygame.K_ESCAPE:
+                    return False
 
 # =========================
 # JUEGO
 # =========================
 def juego():
+
     while True:
-        head_img, fondo_img = seleccionar_personaje_paisaje()
+
+        head_img, fondo_img = selector()
 
         x = ANCHO // 2
         y = ALTO // 2
@@ -290,96 +225,78 @@ def juego():
         snake = [[x, y]]
         longitud = 1
 
-        comida = crear_comida()
-        puntos = 0
+        comida = crear_comida(snake)
 
         jugando = True
 
         while jugando:
-            for evento in pygame.event.get():
-                if evento.type == pygame.QUIT:
+
+            for e in pygame.event.get():
+
+                if e.type == pygame.QUIT:
                     pygame.quit()
                     sys.exit()
 
-                if evento.type == pygame.KEYDOWN:
-                    if evento.key == pygame.K_UP and dy == 0:
-                        dx = 0
-                        dy = -TAM_BLOQUE
-                    elif evento.key == pygame.K_DOWN and dy == 0:
-                        dx = 0
-                        dy = TAM_BLOQUE
-                    elif evento.key == pygame.K_LEFT and dx == 0:
-                        dx = -TAM_BLOQUE
-                        dy = 0
-                    elif evento.key == pygame.K_RIGHT and dx == 0:
-                        dx = TAM_BLOQUE
-                        dy = 0
+                if e.type == pygame.KEYDOWN:
 
-                if mando:
-                    eje_x = mando.get_axis(0)  # izquierda/derecha
-                    eje_y = mando.get_axis(1)  # arriba/abajo
+                    if e.key == pygame.K_ESCAPE:
+                        if not pausa():
+                            return
 
-                    # Evita movimientos muy pequeños (zona muerta)
-                    if abs(eje_x) > 0.5:
-                        if eje_x > 0 and dx == 0:
-                            dx = TAM_BLOQUE
-                            dy = 0
-                        elif eje_x < 0 and dx == 0:
-                            dx = -TAM_BLOQUE
-                            dy = 0
+                    if e.key == pygame.K_UP and dy == 0:
+                        dx, dy = 0, -TAM_BLOQUE
+                    elif e.key == pygame.K_DOWN and dy == 0:
+                        dx, dy = 0, TAM_BLOQUE
+                    elif e.key == pygame.K_LEFT and dx == 0:
+                        dx, dy = -TAM_BLOQUE, 0
+                    elif e.key == pygame.K_RIGHT and dx == 0:
+                        dx, dy = TAM_BLOQUE, 0
 
-                    if abs(eje_y) > 0.5:
-                        if eje_y > 0 and dy == 0:
-                            dx = 0
-                            dy = TAM_BLOQUE
-                        elif eje_y < 0 and dy == 0:
-                            dx = 0
-                            dy = -TAM_BLOQUE
-            x += dx
-            y += dy
-
-            x = x % ANCHO
-            y = y % ALTO
+            # =========================
+            # MOVIMIENTO
+            # =========================
+            x = (x + dx) % ANCHO
+            y = (y + dy) % ALTO
 
             cabeza = [x, y]
             snake.append(cabeza)
 
             if len(snake) > longitud:
-                del snake[0]
+                snake.pop(0)
 
+            # =========================
+            # COLISIÓN CON UNO MISMO
+            # =========================
             if cabeza in snake[:-1]:
-                jugando = False
+                if not game_over():
+                    return
 
+            # =========================
+            # COMIDA
+            # =========================
             if cabeza == comida:
-                comida = crear_comida()
+                comida = crear_comida(snake)
                 longitud += 1
-                puntos += 1
 
+            # =========================
+            # RENDER
+            # =========================
             pantalla.blit(fondo_img, (0, 0))
+            pantalla.blit(donut_img, comida)
 
-            # =========================
-            # OVERLAY OSCURECIDO (JUEGO)
-            # =========================
-            overlay = pygame.Surface((ANCHO, ALTO))
-            # =========================================
-            # CONTROL DE INTENSIDAD DEL EFECTO
-            overlay.set_alpha(90)
-            # =========================================
-            overlay.fill((0, 0, 0))
-            pantalla.blit(overlay, (0, 0))
-
-            pantalla.blit(donut_img, (comida[0], comida[1]))
-
-            dibujar_snake(snake, head_img)
-            mostrar_puntuacion(puntos)
+            for i, b in enumerate(snake):
+                if i == len(snake) - 1:
+                    pantalla.blit(head_img, b)
+                elif i == 0:
+                    pantalla.blit(tail_img, b)
+                else:
+                    pantalla.blit(body_img, b)
 
             pygame.display.update()
             reloj.tick(FPS)
 
-        if not pantalla_game_over(fondo_img):
-            pygame.quit()
-            sys.exit()
-
-
+# =========================
+# INICIO
+# =========================
 if __name__ == "__main__":
     juego()
