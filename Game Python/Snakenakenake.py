@@ -3,7 +3,15 @@ import sys
 import random
 
 pygame.init()
+# Controlador de mando
+pygame.joystick.init()
 
+if pygame.joystick.get_count() > 0:
+    mando = pygame.joystick.Joystick(0)
+    mando.init()
+    print("Mando conectado:", mando.get_name())
+else:
+    mando = None
 # =========================
 # CONFIGURACIÓN
 # =========================
@@ -24,6 +32,7 @@ fuente = pygame.font.SysFont(None, 35)
 fuente_fin = pygame.font.SysFont(None, 50)
 
 OFFSET_CABEZA = int(TAM_BLOQUE * 0.15)
+
 
 # =========================
 # CARGA FIJA
@@ -72,6 +81,8 @@ def seleccionar_personaje_paisaje():
     p_index = 0
     bg_index = 0
 
+    ultimo_movimiento = 0  # ✅ FUERA del while
+    delay = 200
     while True:
         pantalla.fill(NEGRO)
 
@@ -176,7 +187,23 @@ def seleccionar_personaje_paisaje():
 
                 elif evento.key == pygame.K_RETURN:
                     return personajes[p_index], paisajes[bg_index]
+            if evento.type == pygame.JOYBUTTONDOWN:
+                if evento.button == 0:  # botón A (Xbox) / X (PlayStation)
+                    print("Botón A pulsado")
 
+        tiempo_actual = pygame.time.get_ticks()
+
+
+        if mando and tiempo_actual - ultimo_movimiento > delay:
+            eje_x = mando.get_axis(0)
+
+            if eje_x > 0.9:
+                bg_index = (bg_index + 1) % len(paisajes)
+                ultimo_movimiento = tiempo_actual
+
+            elif eje_x < -0.9:
+                p_index = (p_index + 1) % len(personajes)
+                ultimo_movimiento = tiempo_actual
 
 # =========================
 # COMIDA
@@ -288,6 +315,26 @@ def juego():
                         dx = TAM_BLOQUE
                         dy = 0
 
+                if mando:
+                    eje_x = mando.get_axis(0)  # izquierda/derecha
+                    eje_y = mando.get_axis(1)  # arriba/abajo
+
+                    # Evita movimientos muy pequeños (zona muerta)
+                    if abs(eje_x) > 0.5:
+                        if eje_x > 0 and dx == 0:
+                            dx = TAM_BLOQUE
+                            dy = 0
+                        elif eje_x < 0 and dx == 0:
+                            dx = -TAM_BLOQUE
+                            dy = 0
+
+                    if abs(eje_y) > 0.5:
+                        if eje_y > 0 and dy == 0:
+                            dx = 0
+                            dy = TAM_BLOQUE
+                        elif eje_y < 0 and dy == 0:
+                            dx = 0
+                            dy = -TAM_BLOQUE
             x += dx
             y += dy
 
