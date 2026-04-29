@@ -1,16 +1,19 @@
 # Videos de prueba
 
-Este prototipo busca los episodios en esta carpeta.
+Ahora mismo conviven dos usos:
 
-Ejemplos esperados:
+- `episodios/`: vídeos locales para la app de PC.
+- `videos/`: estructura esperada por el servidor Flask del profesor.
 
-- `s01e01.mp4`
-- `s01e02.mp4`
-- `s01e03.mp4`
-- `s02e01.mp4`
-- `s02e02.mp4`
-- `s02e03.mp4`
+Si queréis preparar `videos/` a partir de `episodios/`, podéis ejecutar:
 
-Si no encuentra el archivo, la app entra en un modo demo y simula la reproduccion en pantalla.
+```powershell
+python prototype\media\prepare_professor_server_layout.py
+```
 
-Mas adelante, en Raspberry Pi, esta misma estructura se puede conectar a un reproductor real como `omxplayer`.
+El servidor del profesor detecta bien nombres como:
+
+- `1x01.mp4`
+- `S01E01.mp4`
+
+La app de PC usa `Info.Caps.js` para la metadata y puede trabajar en modo local o en modo remoto contra ese servidor.

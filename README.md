@@ -51,30 +51,40 @@ Cuando tengais decidido el Raspberry Pi OS, el siguiente salto seria:
 
 ## Control remoto Raspberry
 
-He dejado una primera base de servidor en [prototype/media/pi_control_server.py](/C:/Users/xexud/Documents/GitHub/Simpsons-TV/prototype/media/pi_control_server.py) para arrancarlo en la Raspberry por SSH y probar reproducción remota.
+La integración remota se ha adaptado al servidor Flask del profesor. Ese servidor:
 
-Arranque en la Raspberry:
+- usa autenticación por PIN vía `POST /web/auth`
+- exige `X-Web-Pin` en casi todas las peticiones
+- expone `/ip`, `/health`, `/now`, `/episodes`, `/videos`, `/play`, `/stop`, `/volume/up` y `/volume/down`
+- busca los vídeos en una carpeta `videos/`
 
-```bash
-cd ~/Simpsons-TV/prototype/media
-python3 pi_control_server.py
-```
+Herramientas preparadas en este repo:
 
-Pruebas desde el PC con `curl`:
+- [prototype/media/professor_server_client.py](/C:/Users/xexud/Documents/GitHub/Simpsons-TV/prototype/media/professor_server_client.py): cliente reutilizable para Python.
+- [prototype/media/test_remote_control.py](/C:/Users/xexud/Documents/GitHub/Simpsons-TV/prototype/media/test_remote_control.py): pruebas rápidas desde PC.
+- [prototype/media/prepare_professor_server_layout.py](/C:/Users/xexud/Documents/GitHub/Simpsons-TV/prototype/media/prepare_professor_server_layout.py): crea `videos/` a partir de `episodios/`.
+- [prototype/media/simpsons_tv_pc.py](/C:/Users/xexud/Documents/GitHub/Simpsons-TV/prototype/media/simpsons_tv_pc.py): la app de PC ahora puede trabajar también en modo remoto.
 
-```powershell
-curl http://IP_DE_LA_RASPBERRY:5050/health
-curl http://IP_DE_LA_RASPBERRY:5050/episodes?available=1
-curl -X POST http://IP_DE_LA_RASPBERRY:5050/play -H "Content-Type: application/json" -d "{\"episode_id\":\"1x01\"}"
-curl http://IP_DE_LA_RASPBERRY:5050/status
-curl -X POST http://IP_DE_LA_RASPBERRY:5050/stop -H "Content-Type: application/json" -d "{}"
-```
-
-Tambien hay un cliente de prueba en [prototype/media/test_remote_control.py](/C:/Users/xexud/Documents/GitHub/Simpsons-TV/prototype/media/test_remote_control.py):
+Preparar la estructura de vídeos compatible con el servidor:
 
 ```powershell
-python prototype\media\test_remote_control.py --host IP_DE_LA_RASPBERRY health
-python prototype\media\test_remote_control.py --host IP_DE_LA_RASPBERRY episodes
-python prototype\media\test_remote_control.py --host IP_DE_LA_RASPBERRY play 1x01
-python prototype\media\test_remote_control.py --host IP_DE_LA_RASPBERRY stop
+python prototype\media\prepare_professor_server_layout.py
+```
+
+Pruebas desde PC con el cliente:
+
+```powershell
+python prototype\media\test_remote_control.py --host IP_DE_LA_RASPBERRY ip
+python prototype\media\test_remote_control.py --host IP_DE_LA_RASPBERRY --pin 1234 auth
+python prototype\media\test_remote_control.py --host IP_DE_LA_RASPBERRY --pin 1234 health
+python prototype\media\test_remote_control.py --host IP_DE_LA_RASPBERRY --pin 1234 episodes
+python prototype\media\test_remote_control.py --host IP_DE_LA_RASPBERRY --pin 1234 play 1x01
+python prototype\media\test_remote_control.py --host IP_DE_LA_RASPBERRY --pin 1234 now
+python prototype\media\test_remote_control.py --host IP_DE_LA_RASPBERRY --pin 1234 stop
+```
+
+Prueba con interfaz de PC contra la Raspberry:
+
+```powershell
+python prototype\media\simpsons_tv_pc.py --server-host IP_DE_LA_RASPBERRY --server-pin 1234
 ```
