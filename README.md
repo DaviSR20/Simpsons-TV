@@ -48,3 +48,33 @@ Cuando tengais decidido el Raspberry Pi OS, el siguiente salto seria:
 - crear el servicio HTTP local para lanzar capitulos desde movil o PC
 - implementar QR + ajustes WiFi
 - conectar el menu de juegos con `pygame`
+
+## Control remoto Raspberry
+
+He dejado una primera base de servidor en [prototype/media/pi_control_server.py](/C:/Users/xexud/Documents/GitHub/Simpsons-TV/prototype/media/pi_control_server.py) para arrancarlo en la Raspberry por SSH y probar reproducción remota.
+
+Arranque en la Raspberry:
+
+```bash
+cd ~/Simpsons-TV/prototype/media
+python3 pi_control_server.py
+```
+
+Pruebas desde el PC con `curl`:
+
+```powershell
+curl http://IP_DE_LA_RASPBERRY:5050/health
+curl http://IP_DE_LA_RASPBERRY:5050/episodes?available=1
+curl -X POST http://IP_DE_LA_RASPBERRY:5050/play -H "Content-Type: application/json" -d "{\"episode_id\":\"1x01\"}"
+curl http://IP_DE_LA_RASPBERRY:5050/status
+curl -X POST http://IP_DE_LA_RASPBERRY:5050/stop -H "Content-Type: application/json" -d "{}"
+```
+
+Tambien hay un cliente de prueba en [prototype/media/test_remote_control.py](/C:/Users/xexud/Documents/GitHub/Simpsons-TV/prototype/media/test_remote_control.py):
+
+```powershell
+python prototype\media\test_remote_control.py --host IP_DE_LA_RASPBERRY health
+python prototype\media\test_remote_control.py --host IP_DE_LA_RASPBERRY episodes
+python prototype\media\test_remote_control.py --host IP_DE_LA_RASPBERRY play 1x01
+python prototype\media\test_remote_control.py --host IP_DE_LA_RASPBERRY stop
+```
