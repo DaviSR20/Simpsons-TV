@@ -4,50 +4,69 @@ import random
 
 pygame.init()
 
+from Selector import selector
+from ControlesMando import Mando
+
+mando = Mando()
+
 # =========================
-# CONFIGURACIÓN
+# CONFIG
 # =========================
 ANCHO = 600
 ALTO = 400
 TAM_BLOQUE = 20
+HEAD_SIZE = int(TAM_BLOQUE * 1.5)
 
 pantalla = pygame.display.set_mode((ANCHO, ALTO))
 pygame.display.set_caption("Snake")
 
-NEGRO = (0, 0, 0)
-BLANCO = (255, 255, 255)
-ROJO = (255, 0, 0)
-
 reloj = pygame.time.Clock()
 FPS = 7
+
+NEGRO = (0,0,0)
+BLANCO = (255,255,255)
+ROJO = (255,0,0)
 
 fuente = pygame.font.SysFont(None, 30)
 fuente_fin = pygame.font.SysFont(None, 50)
 
 # =========================
-# IMÁGENES FIJAS
+# PERSONAJES
 # =========================
-donut_img = pygame.transform.scale(
-    pygame.image.load("img/Donut.png"), (TAM_BLOQUE, TAM_BLOQUE)
-)
-body_img = pygame.transform.scale(
-    pygame.image.load("img/body.png"), (TAM_BLOQUE, TAM_BLOQUE)
-)
-tail_img = pygame.transform.scale(
-    pygame.image.load("img/tail.png"), (TAM_BLOQUE, TAM_BLOQUE)
-)
+personajes = [
+    pygame.image.load("img/heads/homer.png"),
+    pygame.image.load("img/heads/patty.png"),
+    pygame.image.load("img/heads/smithers.png"),
+    pygame.image.load("img/heads/marge.png"),
+    pygame.image.load("img/heads/bart.png"),
+    pygame.image.load("img/heads/lisa.png")
+]
 
 # =========================
-# UTILIDAD IMÁGENES
+# FONDOS
 # =========================
-def cargar_lista_imagenes(ruta, nombres, escala=1.0):
-    size = int(TAM_BLOQUE * escala)
-    return [
-        pygame.transform.scale(
-            pygame.image.load(f"{ruta}/{n}"), (size, size)
-        )
-        for n in nombres
-    ]
+fondos = [
+    pygame.image.load(f"img/fons/{n}")
+    for n in ["10.jpg","1.jpg","2.jpg","3.jpg","4.jpg","5.jpg","6.jpg","7.png","9.jpg","8.jpg"]
+]
+
+# =========================
+# IMÁGENES SNAKE
+# =========================
+donut_img = pygame.transform.smoothscale(
+    pygame.image.load("img/Donut.png"),
+    (TAM_BLOQUE, TAM_BLOQUE)
+)
+
+body_img = pygame.transform.smoothscale(
+    pygame.image.load("img/body.png"),
+    (TAM_BLOQUE, TAM_BLOQUE)
+)
+
+tail_img = pygame.transform.smoothscale(
+    pygame.image.load("img/tail.png"),
+    (TAM_BLOQUE, TAM_BLOQUE)
+)
 
 # =========================
 # COMIDA
@@ -62,150 +81,61 @@ def crear_comida(snake):
             return pos
 
 # =========================
-# SELECTOR (RESTAURADO)
+# GAME OVER
 # =========================
-def selector():
+def game_over():
 
-    personajes = cargar_lista_imagenes(
-        "img/heads",
-        ["homer.png","patty.png","smithers.png","marge.png","bart.png","lisa.png"],
-        1.2
-    )
-
-    fondos = [
-        pygame.transform.scale(
-            pygame.image.load(f"img/fons/{n}"),
-            (ANCHO, ALTO)
-        )
-        for n in ["10.jpg","1.jpg","2.jpg","3.jpg","4.jpg","5.jpg","6.jpg","7.png","9.jpg","8.jpg"]
-    ]
-
-    p_i = 0
-    f_i = 0
+    pygame.event.clear()
+    mando.update()
 
     while True:
 
-        pantalla.fill((30, 30, 30))
+        mando.update()
 
-        pantalla.blit(fuente.render("Selecciona personaje y paisaje", True, BLANCO), (120, 20))
-        pantalla.blit(fuente.render("← → personaje | A D fondo | ENTER jugar", True, BLANCO), (90, 60))
-
-        # =========================
-        # PERSONAJE
-        # =========================
-        cx = ANCHO // 4
-        cy = ALTO // 2
-
-        main = pygame.transform.scale(personajes[p_i], (80, 80))
-        prev = pygame.transform.scale(personajes[(p_i - 1) % len(personajes)], (50, 50))
-        nxt = pygame.transform.scale(personajes[(p_i + 1) % len(personajes)], (50, 50))
-
-        prev.set_alpha(120)
-        nxt.set_alpha(120)
-
-        pantalla.blit(prev, prev.get_rect(center=(cx - 90, cy)))
-        pantalla.blit(main, main.get_rect(center=(cx, cy)))
-        pantalla.blit(nxt, nxt.get_rect(center=(cx + 90, cy)))
-
-        # =========================
-        # FONDO
-        # =========================
-        fx = 3 * ANCHO // 4
-        fy = ALTO // 2
-
-        bg_main = pygame.transform.scale(fondos[f_i], (160, 100))
-        bg_prev = pygame.transform.scale(fondos[(f_i - 1) % len(fondos)], (110, 70))
-        bg_next = pygame.transform.scale(fondos[(f_i + 1) % len(fondos)], (110, 70))
-
-        bg_prev.set_alpha(120)
-        bg_next.set_alpha(120)
-
-        pantalla.blit(bg_prev, bg_prev.get_rect(center=(fx - 110, fy)))
-        pantalla.blit(bg_main, bg_main.get_rect(center=(fx, fy)))
-        pantalla.blit(bg_next, bg_next.get_rect(center=(fx + 110, fy)))
+        pantalla.fill(NEGRO)
+        pantalla.blit(fuente_fin.render("GAME OVER", True, ROJO), (160,150))
+        pantalla.blit(fuente.render("A reiniciar | B salir", True, BLANCO), (150,220))
 
         pygame.display.update()
-        reloj.tick(20)
 
-        # =========================
-        # INPUT SELECTOR
-        # =========================
+        if mando.A():
+            pygame.event.clear()
+            return "RESTART"
+
+        if mando.B():
+            pygame.quit()
+            sys.exit()
+
         for e in pygame.event.get():
-
             if e.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
-
-            if e.type == pygame.KEYDOWN:
-
-                if e.key == pygame.K_LEFT:
-                    p_i = (p_i - 1) % len(personajes)
-
-                if e.key == pygame.K_RIGHT:
-                    p_i = (p_i + 1) % len(personajes)
-
-                if e.key == pygame.K_a:
-                    f_i = (f_i - 1) % len(fondos)
-
-                if e.key == pygame.K_d:
-                    f_i = (f_i + 1) % len(fondos)
-
-                if e.key == pygame.K_RETURN:
-                    return personajes[p_i], fondos[f_i]
 
 # =========================
 # PAUSA
 # =========================
 def pausa():
 
-    while True:
-
-        pantalla.fill((0, 0, 0))
-
-        pantalla.blit(fuente_fin.render("PAUSA", True, BLANCO), (230, 150))
-        pantalla.blit(fuente.render("ESC = volver | R = salir", True, BLANCO), (150, 220))
-
-        pygame.display.update()
-
-        for e in pygame.event.get():
-
-            if e.type == pygame.QUIT:
-                pygame.quit()
-                sys.exit()
-
-            if e.type == pygame.KEYDOWN:
-
-                if e.key == pygame.K_ESCAPE:
-                    return True
-                if e.key == pygame.K_r:
-                    return False
-
-# =========================
-# GAME OVER
-# =========================
-def game_over():
+    pygame.event.clear()
+    mando.update()
 
     while True:
 
-        pantalla.fill((0, 0, 0))
+        mando.update()
 
-        pantalla.blit(fuente_fin.render("GAME OVER", True, ROJO), (160, 150))
-        pantalla.blit(fuente.render("R = reiniciar | ESC = salir", True, BLANCO), (120, 220))
+        pantalla.fill(NEGRO)
+        pantalla.blit(fuente_fin.render("PAUSA", True, BLANCO), (230,150))
+        pantalla.blit(fuente.render("A continuar | B salir", True, BLANCO), (160,220))
 
         pygame.display.update()
 
-        for e in pygame.event.get():
+        if mando.A():
+            pygame.event.clear()
+            return "CONTINUE"
 
-            if e.type == pygame.QUIT:
-                pygame.quit()
-                sys.exit()
-
-            if e.type == pygame.KEYDOWN:
-
-                if e.key == pygame.K_r:
-                    return True
-                if e.key == pygame.K_ESCAPE:
-                    return False
+        if mando.B():
+            pygame.quit()
+            sys.exit()
 
 # =========================
 # JUEGO
@@ -214,7 +144,18 @@ def juego():
 
     while True:
 
-        head_img, fondo_img = selector()
+        pygame.event.clear()
+
+        # 🔥 SELECTOR CORRECTO
+        head_img, fondo_img = selector(
+            pantalla,
+            reloj,
+            mando,
+            personajes,
+            fondos
+        )
+
+        head_img = pygame.transform.smoothscale(head_img, (HEAD_SIZE, HEAD_SIZE))
 
         x = ANCHO // 2
         y = ALTO // 2
@@ -222,7 +163,7 @@ def juego():
         dx = TAM_BLOQUE
         dy = 0
 
-        snake = [[x, y]]
+        snake = [[x,y]]
         longitud = 1
 
         comida = crear_comida(snake)
@@ -231,62 +172,66 @@ def juego():
 
         while jugando:
 
-            for e in pygame.event.get():
+            mando.update()
 
+            for e in pygame.event.get():
                 if e.type == pygame.QUIT:
                     pygame.quit()
                     sys.exit()
 
                 if e.type == pygame.KEYDOWN:
-
                     if e.key == pygame.K_ESCAPE:
-                        if not pausa():
-                            return
+                        res = pausa()
+                        if res == "EXIT":
+                            pygame.quit()
+                            sys.exit()
 
-                    if e.key == pygame.K_UP and dy == 0:
-                        dx, dy = 0, -TAM_BLOQUE
-                    elif e.key == pygame.K_DOWN and dy == 0:
-                        dx, dy = 0, TAM_BLOQUE
-                    elif e.key == pygame.K_LEFT and dx == 0:
-                        dx, dy = -TAM_BLOQUE, 0
-                    elif e.key == pygame.K_RIGHT and dx == 0:
-                        dx, dy = TAM_BLOQUE, 0
+            # MOVIMIENTO MANDO
+            dirj = mando.direccion_juego()
 
-            # =========================
-            # MOVIMIENTO
-            # =========================
+            if dirj == "UP" and dy == 0:
+                dx, dy = 0, -TAM_BLOQUE
+            elif dirj == "DOWN" and dy == 0:
+                dx, dy = 0, TAM_BLOQUE
+            elif dirj == "LEFT" and dx == 0:
+                dx, dy = -TAM_BLOQUE, 0
+            elif dirj == "RIGHT" and dx == 0:
+                dx, dy = TAM_BLOQUE, 0
+
             x = (x + dx) % ANCHO
             y = (y + dy) % ALTO
 
-            cabeza = [x, y]
+            cabeza = [x,y]
             snake.append(cabeza)
 
             if len(snake) > longitud:
                 snake.pop(0)
 
-            # =========================
-            # COLISIÓN CON UNO MISMO
-            # =========================
+            # COLISIÓN
             if cabeza in snake[:-1]:
-                if not game_over():
-                    return
+                r = game_over()
 
-            # =========================
+                if r == "RESTART":
+                    jugando = False
+                    break
+
             # COMIDA
-            # =========================
             if cabeza == comida:
                 comida = crear_comida(snake)
                 longitud += 1
 
-            # =========================
-            # RENDER
-            # =========================
-            pantalla.blit(fondo_img, (0, 0))
+            # RENDER FONDO
+            fondo_render = pygame.transform.smoothscale(fondo_img, (ANCHO, ALTO))
+            pantalla.blit(fondo_render, (0,0))
+
             pantalla.blit(donut_img, comida)
 
-            for i, b in enumerate(snake):
-                if i == len(snake) - 1:
-                    pantalla.blit(head_img, b)
+            offset = (TAM_BLOQUE - HEAD_SIZE) // 2
+
+            for i,b in enumerate(snake):
+
+                if i == len(snake)-1:
+                    pantalla.blit(head_img, (b[0] + offset, b[1] + offset))
                 elif i == 0:
                     pantalla.blit(tail_img, b)
                 else:
@@ -296,7 +241,7 @@ def juego():
             reloj.tick(FPS)
 
 # =========================
-# INICIO
+# START
 # =========================
 if __name__ == "__main__":
     juego()
