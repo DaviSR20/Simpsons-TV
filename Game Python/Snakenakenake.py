@@ -6,6 +6,7 @@ pygame.init()
 
 from Selector import selector
 from ControlesMando import Mando
+from Menu import Menu
 
 mando = Mando()
 
@@ -51,7 +52,7 @@ fondos = [
 ]
 
 # =========================
-# IMÁGENES SNAKE
+# IMÁGENES
 # =========================
 donut_img = pygame.transform.smoothscale(
     pygame.image.load("img/Donut.png"),
@@ -112,32 +113,6 @@ def game_over():
                 sys.exit()
 
 # =========================
-# PAUSA
-# =========================
-def pausa():
-
-    pygame.event.clear()
-    mando.update()
-
-    while True:
-
-        mando.update()
-
-        pantalla.fill(NEGRO)
-        pantalla.blit(fuente_fin.render("PAUSA", True, BLANCO), (230,150))
-        pantalla.blit(fuente.render("A continuar | B salir", True, BLANCO), (160,220))
-
-        pygame.display.update()
-
-        if mando.A():
-            pygame.event.clear()
-            return "CONTINUE"
-
-        if mando.B():
-            pygame.quit()
-            sys.exit()
-
-# =========================
 # JUEGO
 # =========================
 def juego():
@@ -146,7 +121,7 @@ def juego():
 
         pygame.event.clear()
 
-        # 🔥 SELECTOR CORRECTO
+        # SELECTOR
         head_img, fondo_img = selector(
             pantalla,
             reloj,
@@ -174,19 +149,40 @@ def juego():
 
             mando.update()
 
+            # =========================
+            # EVENTOS BÁSICOS
+            # =========================
             for e in pygame.event.get():
                 if e.type == pygame.QUIT:
                     pygame.quit()
                     sys.exit()
 
-                if e.type == pygame.KEYDOWN:
-                    if e.key == pygame.K_ESCAPE:
-                        res = pausa()
-                        if res == "EXIT":
-                            pygame.quit()
-                            sys.exit()
+            # =========================
+            # 🔥 MENÚ (FIX REAL)
+            # =========================
+            keys = pygame.key.get_pressed()
 
-            # MOVIMIENTO MANDO
+            if keys[pygame.K_ESCAPE] or mando.START():
+
+                pygame.event.clear()
+
+                menu = Menu(pantalla, mando)
+                accion = menu.run()
+
+                if accion == "CONTINUAR":
+                    continue
+
+                elif accion == "REINICIAR":
+                    jugando = False
+                    break
+
+                elif accion == "SALIR":
+                    pygame.quit()
+                    sys.exit()
+
+            # =========================
+            # MOVIMIENTO
+            # =========================
             dirj = mando.direccion_juego()
 
             if dirj == "UP" and dy == 0:
@@ -198,6 +194,9 @@ def juego():
             elif dirj == "RIGHT" and dx == 0:
                 dx, dy = TAM_BLOQUE, 0
 
+            # =========================
+            # LÓGICA
+            # =========================
             x = (x + dx) % ANCHO
             y = (y + dy) % ALTO
 
@@ -209,6 +208,7 @@ def juego():
 
             # COLISIÓN
             if cabeza in snake[:-1]:
+
                 r = game_over()
 
                 if r == "RESTART":
@@ -220,7 +220,9 @@ def juego():
                 comida = crear_comida(snake)
                 longitud += 1
 
-            # RENDER FONDO
+            # =========================
+            # RENDER
+            # =========================
             fondo_render = pygame.transform.smoothscale(fondo_img, (ANCHO, ALTO))
             pantalla.blit(fondo_render, (0,0))
 

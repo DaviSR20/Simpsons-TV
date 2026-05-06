@@ -17,21 +17,24 @@ class Menu:
         self.opcion = 0
 
         self.cooldown = 0
+        self.input_lock = 15  # evita input accidental al abrir
 
     # =========================
-    # PAUSA PRINCIPAL
+    # LOOP PRINCIPAL
     # =========================
     def run(self):
 
+        pygame.event.clear()
+        self.mando.update()
+
         while True:
 
-            self.handle_input()
-            self.draw()
-
-            accion = self.get_action()
+            accion = self.handle_input()
             if accion:
+                pygame.event.clear()
                 return accion
 
+            self.draw()
             pygame.time.delay(16)
 
     # =========================
@@ -39,11 +42,27 @@ class Menu:
     # =========================
     def handle_input(self):
 
+        self.mando.update()
         keys = pygame.key.get_pressed()
+
+        # =========================
+        # INPUT LOCK
+        # =========================
+        if self.input_lock > 0:
+            self.input_lock -= 1
+            return None
 
         if self.cooldown > 0:
             self.cooldown -= 1
-            return
+            return None
+
+        # =========================
+        # EVENTOS
+        # =========================
+        for e in pygame.event.get():
+            if e.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
 
         # =========================
         # TECLADO
@@ -52,58 +71,42 @@ class Menu:
             self.opcion = (self.opcion - 1) % len(self.opciones)
             self.cooldown = 10
 
-        if keys[pygame.K_DOWN]:
+        elif keys[pygame.K_DOWN]:
             self.opcion = (self.opcion + 1) % len(self.opciones)
             self.cooldown = 10
 
-        if keys[pygame.K_RETURN]:
-            self.confirm()
+        elif keys[pygame.K_RETURN]:
+            return self.opciones[self.opcion]
 
-        if keys[pygame.K_ESCAPE]:
-            self.opcion = 0
+        elif keys[pygame.K_ESCAPE]:
             return "CONTINUAR"
 
         # =========================
         # MANDO
         # =========================
-        self.mando.update()
-
         diry = self.mando.direccion_juego()
 
         if diry == "UP":
             self.opcion = (self.opcion - 1) % len(self.opciones)
             self.cooldown = 10
 
-        if diry == "DOWN":
+        elif diry == "DOWN":
             self.opcion = (self.opcion + 1) % len(self.opciones)
             self.cooldown = 10
 
+        # =========================
+        # BOTONES
+        # =========================
         if self.mando.A():
-            self.confirm()
+            return self.opciones[self.opcion]
 
         if self.mando.B():
             return "SALIR"
 
-    # =========================
-    # CONFIRMAR OPCIÓN
-    # =========================
-    def confirm(self):
+        # 🔥 START = CONTINUAR (como ESC)
+        if self.mando.START():
+            return "CONTINUAR"
 
-        selected = self.opciones[self.opcion]
-
-        if selected == "CONTINUAR":
-            self.result = "CONTINUAR"
-
-        elif selected == "REINICIAR":
-            self.result = "REINICIAR"
-
-        elif selected == "SALIR":
-            self.result = "SALIR"
-
-    def get_action(self):
-
-        if hasattr(self, "result"):
-            return self.result
         return None
 
     # =========================
@@ -131,7 +134,7 @@ class Menu:
             )
 
         info = self.fuente_small.render(
-            "↑↓ o joystick = mover | ENTER/A = seleccionar | B = salir | ESC = continuar",
+            "↑↓ / joystick = mover | ENTER/A = seleccionar | START/ESC = continuar | B = salir",
             True,
             (150, 150, 150)
         )
