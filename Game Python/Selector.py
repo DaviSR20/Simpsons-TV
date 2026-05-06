@@ -14,8 +14,7 @@ def selector(pantalla, reloj, mando, personajes, fondos):
     f_i = 0
     cooldown = 0
 
-    # 🔥 BLOQUEO DE INPUT INICIAL
-    input_lock = 20  # frames (~0.3s)
+    input_lock = 20  # evita auto-input al entrar
 
     while True:
 
@@ -29,7 +28,7 @@ def selector(pantalla, reloj, mando, personajes, fondos):
         keys = pygame.key.get_pressed()
 
         # =========================
-        # INPUT LOCK (FIX CLAVE)
+        # INPUT LOCK
         # =========================
         if input_lock > 0:
             input_lock -= 1
@@ -43,6 +42,9 @@ def selector(pantalla, reloj, mando, personajes, fondos):
         move_p = mando.selector_personaje()
         move_f = mando.selector_fondo()
 
+        # =========================
+        # INPUT CARRUSEL
+        # =========================
         if cooldown == 0:
 
             if keys[pygame.K_LEFT] or move_p == "LEFT":
@@ -62,7 +64,7 @@ def selector(pantalla, reloj, mando, personajes, fondos):
                 cooldown = 8
 
         # =========================
-        # CONFIRMAR (YA SEGURO)
+        # CONFIRMAR
         # =========================
         if keys[pygame.K_RETURN] or mando.A():
             pygame.event.clear()
@@ -75,35 +77,56 @@ def selector(pantalla, reloj, mando, personajes, fondos):
         # =========================
         # RENDER
         # =========================
-        pantalla.fill((20,20,20))
+        pantalla.fill((20, 20, 20))
 
         legend = [
             "Selecciona personaje y paisaje",
-            "A / Joystick Izq personaje | S / Joystick Der paisaje",
-            "Enter / A Jugar"
+            "A / Stick Izq = personaje | S / Stick Der = fondo",
+            "ENTER / A = jugar"
         ]
 
         for i, line in enumerate(legend):
-            txt = fuente_small.render(line, True, (220,220,220))
-            pantalla.blit(txt, (ANCHO//2 - txt.get_width()//2, 30 + i*22))
+            txt = fuente_small.render(line, True, (220, 220, 220))
+            pantalla.blit(txt, (ANCHO//2 - txt.get_width()//2, 30 + i * 22))
 
-        # PERSONAJE
-        main = pygame.transform.smoothscale(personajes[p_i], (90,90))
-        prev = pygame.transform.smoothscale(personajes[(p_i-1)%len(personajes)], (60,60))
-        nxt  = pygame.transform.smoothscale(personajes[(p_i+1)%len(personajes)], (60,60))
+        # =========================
+        # CENTRO GLOBAL
+        # =========================
+        centro_y = ALTO // 2 + 20
 
-        pantalla.blit(prev, prev.get_rect(center=(ANCHO//4 - 100, ALTO//2)))
-        pantalla.blit(main, main.get_rect(center=(ANCHO//4, ALTO//2)))
-        pantalla.blit(nxt, nxt.get_rect(center=(ANCHO//4 + 100, ALTO//2)))
+        # =========================
+        # PERSONAJES (CARRUSEL)
+        # =========================
+        centro_x_p = ANCHO // 4
+        offset_p = 80
 
-        # FONDO
-        bg_main = pygame.transform.smoothscale(fondos[f_i], (160,110))
-        bg_prev = pygame.transform.smoothscale(fondos[(f_i-1)%len(fondos)], (120,80))
-        bg_next = pygame.transform.smoothscale(fondos[(f_i+1)%len(fondos)], (120,80))
+        main_size = 90
+        side_size = 60
 
-        pantalla.blit(bg_prev, bg_prev.get_rect(center=(3*ANCHO//4 - 120, ALTO//2)))
-        pantalla.blit(bg_main, bg_main.get_rect(center=(3*ANCHO//4, ALTO//2)))
-        pantalla.blit(bg_next, bg_next.get_rect(center=(3*ANCHO//4 + 120, ALTO//2)))
+        main = pygame.transform.smoothscale(personajes[p_i], (main_size, main_size))
+        prev = pygame.transform.smoothscale(personajes[(p_i - 1) % len(personajes)], (side_size, side_size))
+        nxt  = pygame.transform.smoothscale(personajes[(p_i + 1) % len(personajes)], (side_size, side_size))
+
+        pantalla.blit(prev, prev.get_rect(center=(centro_x_p - offset_p, centro_y)))
+        pantalla.blit(main, main.get_rect(center=(centro_x_p, centro_y)))
+        pantalla.blit(nxt,  nxt.get_rect(center=(centro_x_p + offset_p, centro_y)))
+
+        # =========================
+        # FONDOS (CARRUSEL)
+        # =========================
+        centro_x_f = 3 * ANCHO // 4
+        offset_f = 110
+
+        bg_main_size = (160, 110)
+        bg_side_size = (120, 80)
+
+        bg_main = pygame.transform.smoothscale(fondos[f_i], bg_main_size)
+        bg_prev = pygame.transform.smoothscale(fondos[(f_i - 1) % len(fondos)], bg_side_size)
+        bg_next = pygame.transform.smoothscale(fondos[(f_i + 1) % len(fondos)], bg_side_size)
+
+        pantalla.blit(bg_prev, bg_prev.get_rect(center=(centro_x_f - offset_f, centro_y)))
+        pantalla.blit(bg_main, bg_main.get_rect(center=(centro_x_f, centro_y)))
+        pantalla.blit(bg_next, bg_next.get_rect(center=(centro_x_f + offset_f, centro_y)))
 
         pygame.display.update()
         reloj.tick(60)
