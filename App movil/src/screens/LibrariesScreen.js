@@ -11,7 +11,7 @@ import {
 import InfoCard from "../components/InfoCard";
 import PrimaryButton from "../components/PrimaryButton";
 import SectionTitle from "../components/SectionTitle";
-import { fetchHealth, fetchNow, fetchVideos } from "../api/serverApi";
+import { fetchHealth, fetchNow, fetchVideos, ledOff, ledOn } from "../api/serverApi";
 import { palette } from "../theme/palette";
 
 export default function LibrariesScreen({ navigation, route }) {
@@ -22,6 +22,7 @@ export default function LibrariesScreen({ navigation, route }) {
   const [health, setHealth] = useState(route.params?.connection?.health || null);
   const [now, setNow] = useState(null);
   const [libraries, setLibraries] = useState([]);
+  const [ledStateText, setLedStateText] = useState(route.params?.connection?.ledMessage || "");
 
   const loadData = useCallback(async () => {
     if (!connection?.baseUrl || !connection?.pin) {
@@ -70,6 +71,24 @@ export default function LibrariesScreen({ navigation, route }) {
     }
   }
 
+  async function handleLedOn() {
+    try {
+      await ledOn(connection.baseUrl, connection.pin);
+      setLedStateText("LED azul encendido.");
+    } catch (error) {
+      setLedStateText(error.message || "No se pudo encender el LED azul.");
+    }
+  }
+
+  async function handleLedOff() {
+    try {
+      await ledOff(connection.baseUrl, connection.pin);
+      setLedStateText("LED azul apagado.");
+    } catch (error) {
+      setLedStateText(error.message || "No se pudo apagar el LED azul.");
+    }
+  }
+
   if (loading) {
     return (
       <SafeAreaView style={styles.centered}>
@@ -93,6 +112,11 @@ export default function LibrariesScreen({ navigation, route }) {
               subtitle={`Reproduciendo: ${now?.playing || "nada ahora mismo"}`}
               rightText={health?.running ? "PLAY" : "IDLE"}
             />
+            <View style={styles.ledActions}>
+              <PrimaryButton label="LED ON" onPress={handleLedOn} />
+              <PrimaryButton label="LED OFF" onPress={handleLedOff} tone="secondary" />
+            </View>
+            {ledStateText ? <Text style={styles.ledText}>{ledStateText}</Text> : null}
             <Text style={styles.helper}>
               Selecciona una biblioteca para ver temporadas y lanzar episodios.
             </Text>
@@ -146,6 +170,14 @@ const styles = StyleSheet.create({
   },
   helper: {
     color: palette.muted,
+    lineHeight: 20,
+  },
+  ledActions: {
+    gap: 10,
+  },
+  ledText: {
+    color: palette.primary,
+    fontWeight: "700",
     lineHeight: 20,
   },
   libraryCard: {

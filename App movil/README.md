@@ -32,3 +32,4 @@ npx expo start
 - Para reproducir, la app envía `id` y `directory`, que es lo que espera `control_api.py`.
 - Para el LED azul, hay que añadir a `control_api.py` los endpoints `/led/on` y `/led/off`.
 - La guía exacta para esa parte está en [LED_AZUL_CONTROL_API.md](/C:/Users/xexud/Documents/GitHub/Simpsons-TV/App movil/LED_AZUL_CONTROL_API.md).
+- La forma actual de subir/buildar con Expo está explicada en [EXPO_BUILD_ACTUAL.md](/C:/Users/xexud/Documents/GitHub/Simpsons-TV/App movil/EXPO_BUILD_ACTUAL.md).

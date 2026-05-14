@@ -32,6 +32,7 @@ export default function ConnectScreen({ navigation }) {
   const [connecting, setConnecting] = useState(false);
   const [scannerOpen, setScannerOpen] = useState(false);
   const [scanLocked, setScanLocked] = useState(false);
+  const [ledMessage, setLedMessage] = useState("");
 
   useEffect(() => {
     let active = true;
@@ -65,14 +66,20 @@ export default function ConnectScreen({ navigation }) {
     }
 
     setConnecting(true);
+    setLedMessage("");
     try {
       await authenticate(normalizedBaseUrl, pin.trim());
       const health = await fetchHealth(normalizedBaseUrl, pin.trim());
+      let ledConnected = false;
+      let nextLedMessage = "LED azul no comprobado.";
       try {
         await ledOn(normalizedBaseUrl, pin.trim());
+        ledConnected = true;
+        nextLedMessage = "LED azul encendido correctamente.";
       } catch (ledError) {
-        console.warn("No se pudo encender el LED azul:", ledError);
+        nextLedMessage = `Conectado, pero el LED azul no respondió: ${ledError.message || ledError}`;
       }
+      setLedMessage(nextLedMessage);
       await saveConnection({
         baseUrl: normalizedBaseUrl,
         pin: pin.trim(),
@@ -83,6 +90,8 @@ export default function ConnectScreen({ navigation }) {
           baseUrl: normalizedBaseUrl,
           pin: pin.trim(),
           health,
+          ledConnected,
+          ledMessage: nextLedMessage,
         },
       });
     } catch (error) {
@@ -180,6 +189,7 @@ export default function ConnectScreen({ navigation }) {
 
         {connecting ? <ActivityIndicator color={palette.primary} size="small" /> : null}
         {status ? <Text style={styles.status}>{status}</Text> : null}
+        {ledMessage ? <Text style={styles.ledStatus}>{ledMessage}</Text> : null}
       </ScrollView>
 
       <Modal visible={scannerOpen} animationType="slide">
@@ -257,6 +267,11 @@ const styles = StyleSheet.create({
   status: {
     color: palette.accent,
     lineHeight: 20,
+  },
+  ledStatus: {
+    color: palette.primary,
+    lineHeight: 20,
+    fontWeight: "700",
   },
   modalContainer: {
     flex: 1,
