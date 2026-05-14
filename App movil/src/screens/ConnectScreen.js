@@ -13,7 +13,13 @@ import { CameraView, useCameraPermissions } from "expo-camera";
 import PrimaryButton from "../components/PrimaryButton";
 import InfoCard from "../components/InfoCard";
 import SectionTitle from "../components/SectionTitle";
-import { authenticate, fetchHealth, normalizeBaseUrl, parseQrPayload } from "../api/serverApi";
+import {
+  authenticate,
+  fetchHealth,
+  ledOn,
+  normalizeBaseUrl,
+  parseQrPayload,
+} from "../api/serverApi";
 import { clearConnection, loadConnection, saveConnection } from "../storage/connectionStorage";
 import { palette } from "../theme/palette";
 
@@ -62,6 +68,11 @@ export default function ConnectScreen({ navigation }) {
     try {
       await authenticate(normalizedBaseUrl, pin.trim());
       const health = await fetchHealth(normalizedBaseUrl, pin.trim());
+      try {
+        await ledOn(normalizedBaseUrl, pin.trim());
+      } catch (ledError) {
+        console.warn("No se pudo encender el LED azul:", ledError);
+      }
       await saveConnection({
         baseUrl: normalizedBaseUrl,
         pin: pin.trim(),

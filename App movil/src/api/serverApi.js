@@ -79,6 +79,22 @@ export async function fetchNow(baseUrl, pin) {
   return requestJson(baseUrl, "/now", { pin });
 }
 
+export async function ledOn(baseUrl, pin) {
+  return requestJson(baseUrl, "/led/on", {
+    method: "POST",
+    pin,
+    body: {},
+  });
+}
+
+export async function ledOff(baseUrl, pin) {
+  return requestJson(baseUrl, "/led/off", {
+    method: "POST",
+    pin,
+    body: {},
+  });
+}
+
 export async function playEpisode(baseUrl, pin, id, directory) {
   return requestJson(baseUrl, "/play", {
     method: "POST",
