@@ -17,7 +17,14 @@
     "android": {
       "permissions": [
         "CAMERA"
-      ]
+      ],
+      "usesCleartextTraffic": true,
+      "package": "com.xexu112.simpsonstvmobile"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "96909eb3-dd58-44cf-b9c5-0c2d9d3accac"
+      }
     }
   }
 }

@@ -2,19 +2,8 @@ import React from "react";
 import { FlatList, SafeAreaView, StyleSheet, Text, View } from "react-native";
 import InfoCard from "../components/InfoCard";
 import PrimaryButton from "../components/PrimaryButton";
+import { buildClientEpisode } from "../components/episodeCatalog";
 import { palette } from "../theme/palette";
-
-function serverEpisodeToClientEpisode(serverEpisode, libraryName) {
-  return {
-    id: serverEpisode.id,
-    title: `Episodio ${serverEpisode.episodeNumber}`,
-    synopsis: `Archivo detectado en ${libraryName}. Ruta: ${serverEpisode.relativePath}`,
-    seasonNumber: serverEpisode.seasonNumber,
-    episodeNumber: serverEpisode.episodeNumber,
-    directoryPath: serverEpisode.relativePath,
-    file: serverEpisode.file,
-  };
-}
 
 export default function EpisodesScreen({ navigation, route }) {
   const connection = route.params?.connection;
@@ -48,7 +37,7 @@ export default function EpisodesScreen({ navigation, route }) {
                 navigation.navigate("EpisodeDetail", {
                   connection,
                   library,
-                  episode: serverEpisodeToClientEpisode(item, library?.name || "biblioteca"),
+                  episode: buildClientEpisode(item, library?.name || "biblioteca"),
                 })
               }
             />

@@ -1,5 +1,14 @@
-import React, { useState } from "react";
-import { Alert, SafeAreaView, ScrollView, StyleSheet, Text, View } from "react-native";
+import React, { useMemo, useState } from "react";
+import {
+  Alert,
+  Image,
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+  useWindowDimensions,
+} from "react-native";
 import PrimaryButton from "../components/PrimaryButton";
 import InfoCard from "../components/InfoCard";
 import { fetchNow, playEpisode, stopPlayback, volumeDown, volumeUp } from "../api/serverApi";
@@ -11,6 +20,13 @@ export default function EpisodeDetailScreen({ route }) {
   const episode = route.params?.episode;
   const [status, setStatus] = useState("");
   const [busy, setBusy] = useState(false);
+  const { width: windowWidth } = useWindowDimensions();
+  const thumbnailWidth = useMemo(() => {
+    const horizontalPadding = 18 * 2;
+    const cardInnerPadding = 16 * 2;
+    const cardBorders = 2;
+    return Math.max(220, windowWidth - horizontalPadding - cardInnerPadding - cardBorders);
+  }, [windowWidth]);
 
   async function handlePlay() {
     setBusy(true);
@@ -83,6 +99,15 @@ export default function EpisodeDetailScreen({ route }) {
         />
 
         <View style={styles.card}>
+          {episode.imageSource ? (
+            <View style={styles.thumbnailFrame}>
+              <Image
+                source={episode.imageSource}
+                style={[styles.thumbnail, { width: thumbnailWidth }]}
+                resizeMode="cover"
+              />
+            </View>
+          ) : null}
           <Text style={styles.sectionTitle}>Ruta</Text>
           <Text style={styles.body}>{episode.directoryPath}</Text>
           <Text style={styles.sectionTitle}>Sinopsis</Text>
@@ -119,6 +144,19 @@ const styles = StyleSheet.create({
     borderColor: palette.border,
     padding: 16,
     gap: 8,
+    overflow: "hidden",
+  },
+  thumbnailFrame: {
+    width: "100%",
+    borderRadius: 14,
+    overflow: "hidden",
+    alignItems: "center",
+    backgroundColor: "#1b2330",
+    marginBottom: 6,
+  },
+  thumbnail: {
+    aspectRatio: 16 / 9,
+    maxWidth: "100%",
   },
   sectionTitle: {
     color: palette.text,

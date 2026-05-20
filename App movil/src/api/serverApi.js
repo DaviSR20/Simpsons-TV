@@ -34,11 +34,18 @@ async function requestJson(baseUrl, path, { method = "GET", pin, body } = {}) {
     headers["Content-Type"] = "application/json";
   }
 
-  const response = await fetch(`${trimTrailingSlash(baseUrl)}${path}`, {
-    method,
-    headers,
-    body: body !== undefined ? JSON.stringify(body) : undefined,
-  });
+  let response;
+  try {
+    response = await fetch(`${trimTrailingSlash(baseUrl)}${path}`, {
+      method,
+      headers,
+      body: body !== undefined ? JSON.stringify(body) : undefined,
+    });
+  } catch (error) {
+    throw new Error(
+      "Network request failed. Comprueba que el movil este en la misma Wi-Fi y que la build permita trafico http hacia la Raspberry."
+    );
+  }
 
   const text = await response.text();
   let payload = {};
