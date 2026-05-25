@@ -4,6 +4,7 @@ import InfoCard from "../components/InfoCard";
 import PrimaryButton from "../components/PrimaryButton";
 import SectionTitle from "../components/SectionTitle";
 import { palette } from "../theme/palette";
+import images from "../../../episodes/images";
 
 function groupBySeason(videos) {
   const map = new Map();
@@ -50,6 +51,7 @@ export default function SeasonsScreen({ navigation, route }) {
               title={item.title}
               subtitle={`${item.episodes.length} episodios`}
               rightText={`S${String(item.seasonNumber).padStart(2, "0")}`}
+              imageSource={images[`Season_${item.seasonNumber}_Icon.webp`]}
             />
             <PrimaryButton
               label="Ver episodios"
