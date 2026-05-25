@@ -1,10 +1,11 @@
 import React from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { Image, StyleSheet, Text, View } from "react-native";
 import { palette } from "../theme/palette";
 
-export default function InfoCard({ title, subtitle, rightText }) {
+export default function InfoCard({ title, subtitle, rightText, imageSource }) {
   return (
     <View style={styles.card}>
+      {imageSource ? <Image source={imageSource} style={styles.thumbnail} resizeMode="cover" /> : null}
       <View style={styles.textBlock}>
         <Text style={styles.title}>{title}</Text>
         {subtitle ? <Text style={styles.subtitle}>{subtitle}</Text> : null}
@@ -28,6 +29,12 @@ const styles = StyleSheet.create({
   },
   textBlock: {
     flex: 1,
+  },
+  thumbnail: {
+    width: 76,
+    height: 44,
+    borderRadius: 10,
+    backgroundColor: "#1b2330",
   },
   title: {
     color: palette.text,

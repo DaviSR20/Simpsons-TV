@@ -24,25 +24,29 @@ export default function EpisodesScreen({ navigation, route }) {
             </Text>
           </View>
         }
-        renderItem={({ item }) => (
-          <View style={styles.row}>
-            <InfoCard
-              title={`E${String(item.episodeNumber || 0).padStart(2, "0")} · ${item.file}`}
-              subtitle={item.relativePath}
-              rightText={item.id}
-            />
-            <PrimaryButton
-              label="Abrir ficha"
-              onPress={() =>
-                navigation.navigate("EpisodeDetail", {
-                  connection,
-                  library,
-                  episode: buildClientEpisode(item, library?.name || "biblioteca"),
-                })
-              }
-            />
-          </View>
-        )}
+        renderItem={({ item }) => {
+          const clientEpisode = buildClientEpisode(item, library?.name || "biblioteca");
+          return (
+            <View style={styles.row}>
+              <InfoCard
+                title={`E${String(item.episodeNumber || 0).padStart(2, "0")} · ${clientEpisode.title}`}
+                subtitle={item.relativePath}
+                rightText={item.id}
+                imageSource={clientEpisode.imageSource}
+              />
+              <PrimaryButton
+                label="Abrir ficha"
+                onPress={() =>
+                  navigation.navigate("EpisodeDetail", {
+                    connection,
+                    library,
+                    episode: clientEpisode,
+                  })
+                }
+              />
+            </View>
+          );
+        }}
       />
     </SafeAreaView>
   );
