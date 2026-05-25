@@ -7,18 +7,37 @@ class Mando:
         pygame.joystick.init()
 
         self.joystick = None
-        self.deadzone = 0.3
+        self.deadzone = 0.2
 
     # =========================
     # INIT SAFE
     # =========================
     def update(self):
 
+        pygame.event.pump()
+
         if self.joystick is None:
 
             if pygame.joystick.get_count() > 0:
                 self.joystick = pygame.joystick.Joystick(0)
                 self.joystick.init()
+
+    def _direccion_cruceta(self):
+        if not self.joystick or self.joystick.get_numhats() <= 0:
+            return None
+
+        hat_x, hat_y = self.joystick.get_hat(0)
+
+        if hat_y > 0:
+            return "UP"
+        if hat_y < 0:
+            return "DOWN"
+        if hat_x < 0:
+            return "LEFT"
+        if hat_x > 0:
+            return "RIGHT"
+
+        return None
 
     # =========================
     # BOTONES
@@ -46,6 +65,10 @@ class Mando:
         if not self.joystick:
             return None
 
+        direccion_hat = self._direccion_cruceta()
+        if direccion_hat is not None:
+            return direccion_hat
+
         x = self.joystick.get_axis(0)
         y = self.joystick.get_axis(1)
 
@@ -65,6 +88,10 @@ class Mando:
         if not self.joystick:
             return None
 
+        direccion_hat = self._direccion_cruceta()
+        if direccion_hat in ("LEFT", "RIGHT"):
+            return direccion_hat
+
         x = self.joystick.get_axis(0)
 
         if abs(x) < self.deadzone:
@@ -80,7 +107,11 @@ class Mando:
         if not self.joystick:
             return None
 
-        x = self.joystick.get_axis(2)
+        direccion_hat = self._direccion_cruceta()
+        if direccion_hat in ("LEFT", "RIGHT"):
+            return direccion_hat
+
+        x = self.joystick.get_axis(3)
 
         if abs(x) < self.deadzone:
             return None

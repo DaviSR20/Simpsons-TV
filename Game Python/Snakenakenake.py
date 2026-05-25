@@ -1,6 +1,7 @@
 import pygame
 import sys
 import random
+import os
 
 pygame.init()
 
@@ -9,7 +10,7 @@ from ControlesMando import Mando
 from Menu import Menu
 
 mando = Mando()
-
+os.chdir(os.path.dirname(os.path.abspath(__file__)))
 # =========================
 # CONFIG
 # =========================
@@ -94,11 +95,30 @@ def game_over():
         mando.update()
 
         pantalla.fill(NEGRO)
-        pantalla.blit(fuente_fin.render("GAME OVER", True, ROJO), (160,150))
-        pantalla.blit(fuente.render("A reiniciar | B salir", True, BLANCO), (150,220))
+
+        # =========================
+        # TEXTOS
+        # =========================
+        texto_game_over = fuente_fin.render("GAME OVER", True, ROJO)
+        texto_opciones = fuente.render("A reiniciar | B salir", True, BLANCO)
+
+        # =========================
+        # CENTRAR TEXTOS
+        # =========================
+        rect_game_over = texto_game_over.get_rect(center=(ANCHO // 2, ALTO // 2 - 40))
+        rect_opciones = texto_opciones.get_rect(center=(ANCHO // 2, ALTO // 2 + 20))
+
+        # =========================
+        # DIBUJAR
+        # =========================
+        pantalla.blit(texto_game_over, rect_game_over)
+        pantalla.blit(texto_opciones, rect_opciones)
 
         pygame.display.update()
 
+        # =========================
+        # CONTROLES
+        # =========================
         if mando.A():
             pygame.event.clear()
             return "RESTART"
@@ -179,6 +199,22 @@ def juego():
                 elif accion == "SALIR":
                     pygame.quit()
                     sys.exit()
+            # =========================
+            # CONTROLES TECLADO
+            # =========================
+            teclas = pygame.key.get_pressed()
+
+            if (teclas[pygame.K_LEFT] or teclas[pygame.K_a]) and dx == 0:
+                dx, dy = -TAM_BLOQUE, 0
+
+            elif (teclas[pygame.K_RIGHT] or teclas[pygame.K_d]) and dx == 0:
+                dx, dy = TAM_BLOQUE, 0
+
+            elif (teclas[pygame.K_UP] or teclas[pygame.K_w]) and dy == 0:
+                dx, dy = 0, -TAM_BLOQUE
+
+            elif (teclas[pygame.K_DOWN] or teclas[pygame.K_s]) and dy == 0:
+                dx, dy = 0, TAM_BLOQUE
 
             # =========================
             # MOVIMIENTO
